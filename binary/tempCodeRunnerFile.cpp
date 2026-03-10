@@ -1,0 +1,1 @@
+temp_parent->left = temp->left;
