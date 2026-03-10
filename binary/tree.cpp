@@ -1,4 +1,4 @@
-#include "../helper-header.h"
+#include "../helper-functions.cpp"
 
 struct Node
 {
@@ -24,13 +24,13 @@ public:
     void insert(int element);
     void remove(int element); //delete yra operator cpp tai kitoks name
     Node* search(int element); //returnina pointer tai visai nice
-    //void delete_subtree(Node* node);
+    void delete_subtree(Node* node);
    // Node* search(Node* node, int element); //recursive search
     void in_order_traverse(Node* node);
     void pre_order_traverse(Node* node);
-    void post_order_traverse();
+    void post_order_traverse(Node* node);
     void print_vector();
-   // ~Tree();
+    ~Tree();
 };
 
 void Tree::insert(int element)
@@ -190,15 +190,23 @@ Node* Tree::search(Node* node, int element)
 void Tree::in_order_traverse(Node* node)
 //inorder Traversal: 10 20 30 100 150 200 300
 {
-if(node == nullptr)
-{
-    return;
-}
+    if(node == nullptr)
+        return;
+
+    in_order_traverse(node->left);
+    traverse_vector.push_back(node->element);
+    in_order_traverse(node->right);
 }
 
-void Tree::post_order_traverse()
+void Tree::post_order_traverse(Node* node)
+//Postorder Traversal: 10 30 20 150 300 200 100
 {
-//todo
+    if(node == nullptr)
+        return;
+    
+    post_order_traverse(node->left);
+    post_order_traverse(node->right);
+    traverse_vector.push_back(node->element); 
 }
 void Tree::pre_order_traverse(Node* node)
 {
@@ -212,16 +220,52 @@ void Tree::pre_order_traverse(Node* node)
     pre_order_traverse(node->left);
     pre_order_traverse(node->right);
 }
-/*
-void delete_subtree(Node* node)
-{
 
+void Tree::delete_subtree(Node* node)
+{
+    if(node == nullptr)
+        return;
+    
+    if(node == root)
+    {
+        delete_subtree(node->left);
+        delete_subtree(node->right);
+        delete node;
+        root = nullptr;
+        return;   
+    }
+
+    Node* parent = root;
+    
+    while(parent != nullptr)
+    {
+        if(parent->left == node)
+        {
+            parent->left = nullptr;
+            break;
+        }
+
+        if(parent->right == node)
+        {
+            parent->right = nullptr;
+            break;
+        }
+        
+        if(node->element < parent->element)
+            parent = parent->left;
+        else
+            parent = parent->right;
+    }
+
+    delete_subtree(node->left);
+    delete_subtree(node->right);
+    delete node;
 }
 Tree::~Tree()
 {
     delete_subtree(root);
 }
-*/
+
 void Tree::print_vector()
 {
     if(traverse_vector.size() == 0)
@@ -284,7 +328,7 @@ void menu()
             switch (traverse_option)
             {
             case 1:
-                tree.in_order_traverse();
+                tree.in_order_traverse(tree.root);
                 std::cout << std::endl;
                 break;
             case 2:
@@ -292,7 +336,7 @@ void menu()
                 std::cout << std::endl;
                 break;
             case 3:
-                tree.post_order_traverse();
+                tree.post_order_traverse(tree.root);
                 std::cout << std::endl;
                 break;
             default:
@@ -310,12 +354,15 @@ void menu()
         {
             //todo delete subtree root
             std::cout << "Enter which subtree you want to delete (the element entered will also be deleted: ";
+            int element = get_int(INT_MIN, INT_MAX);
+            Node* node = tree.search(element);
+            if(node != nullptr)
+                tree.delete_subtree(node);
         }
         else
         {
-            //todo delete subtree(root)
             std::cout << "Exiting the program...\n";
-            return 0;
+            return;
         }
         
     }
